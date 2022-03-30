@@ -38,13 +38,18 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Prepare MSBuild
-      uses: microsoft/setup-msbuild@v1.1
-      with:
-        vs-version: '[16.4,16.5)'
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Prepare NuGet
+      uses: nuget/setup-nuget@v1
+
+    - name: Restore Packages
+      working-directory: ./src/ToyCompany
+      run: nuget restore ToyCompany.sln
 
     - name: Build database project
       working-directory: ./src/ToyCompany/ToyCompany.Database
-      run: MSBuild.exe ToyCompany.Database.sqlproj -property:Configuration=Release
+      run: MSBuild.exe ToyCompany.Database.sqlproj /property:Configuration=Release
 
     - name: Upload website as workflow artifact
       uses: actions/upload-artifact@v2
