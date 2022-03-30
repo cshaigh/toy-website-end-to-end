@@ -23,10 +23,12 @@ jobs:
      runs-on: ubuntu-latest
      steps: 
      - uses: actions/checkout@v2
+
      - uses: azure/login@v1
        name: Sign in to Azure
        with:
          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
      - if: inputs.environmentType != 'Production'
        uses: azure/arm-deploy@v1
        name: Run preflight validation
@@ -39,6 +41,7 @@ jobs:
            reviewApiUrl=${{ inputs.reviewApiUrl }}
            reviewApiKey=${{ secrets.reviewApiKey }}
          deploymentMode: Validate
+
      - if: inputs.environmentType == 'Production'
        uses: Azure/cli@v1
        name: Run what-if
@@ -82,7 +85,7 @@ jobs:
     environment: ${{ inputs.environmentType }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/download-artifacts@v2
+    - uses: actions/download-artifact@v2
 
     - uses: azure/login@v1
       name: Sign in to Azure
@@ -100,10 +103,12 @@ jobs:
     needs: deploy
     steps: 
     - uses: actions/checkout@v2
+
     - run: |
         $container = New-PesterContainer `
           -Path 'deploy/Website.Tests.ps1' `
           -Data @{ HostName = '${{needs.deploy.outputs.appServiceAppHostName}}' }
+          
         Invoke-Pester `
           -Container $container `
           -CI
