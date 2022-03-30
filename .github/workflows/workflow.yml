@@ -26,7 +26,7 @@ jobs:
 
     with:
       environmentType: Test
-      resourceGroupName: ToyWebsiteTest
+      resourceGroupName: ChrisToyWebsiteTest
       reviewApiUrl: https://sandbox.contoso.com/reviews
 
     secrets:
@@ -43,7 +43,7 @@ jobs:
 
     with:
       environmentType: Production
-      resourceGroupName: ToyWebsiteProduction
+      resourceGroupName: ChrisToyWebsiteProduction
       reviewApiUrl: https://api.contoso.com/reviews
 
     secrets:
