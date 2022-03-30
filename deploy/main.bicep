@@ -177,3 +177,5 @@ output appServiceAppName string = appServiceApp.name
 output appServiceAppHostName string = appServiceApp.properties.defaultHostName
 output storageAccountName string = storageAccount.name
 output storageAccountImagesBlobContainerName string = storageAccount::blobService::storageAccountImagesBlobContainer.name
+output sqlServerFullyQualifiedDomainName string = sqlServer.properties.fullyQualifiedDomainName
+output sqlDatabaseName string = sqlServer::sqlDatabase.name
