@@ -19,12 +19,22 @@ param reviewApiUrl string
 @description('The API key to use when accessing the product review API.')
 param reviewApiKey string
 
+@description('The administrator login username for the SQL server.')
+param sqlServerAdministratorLogin string
+
+@secure()
+@description('The administrator login password for the SQL server.')
+param sqlServerAdministratorLoginPassword string
+
 // Define the names for resources.
 var appServiceAppName = 'toy-website-${resourceNameSuffix}'
 var appServicePlanName = 'toy-website'
 var applicationInsightsName = 'toywebsite'
 var storageAccountName = 'mystorage${resourceNameSuffix}'
 var storageAccountImagesBlobContainerName = 'toyimages'
+var sqlServerName = 'toy-website-${resourceNameSuffix}'
+var sqlDatabaseName = 'Toys'
+var sqlDatabaseConnectionString = 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${sqlServer::sqlDatabase.name};Persist Security Info=False;User ID=${sqlServerAdministratorLogin};Password=${sqlServerAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 
 // Define the SKUs for each component based on the environment type.
 var environmentConfigurationMap = {
@@ -35,11 +45,23 @@ var environmentConfigurationMap = {
         capacity: 1
       }
     }
+    sqlDatabase: {
+      sku: {
+        name: 'Standard'
+        tier: 'Standard'
+      }
+    }
   }
   Test: {
     appServicePlan: {
       sku: {
         name: 'F1'
+      }
+    }
+    sqlDatabase: {
+      sku: {
+        name: 'Standard'
+        tier: 'Standard'
       }
     }
   }
@@ -87,6 +109,10 @@ resource appServiceApp 'Microsoft.Web/sites@2021-01-15' = {
           name: 'StorageAccountImagesContainerName'
           value: storageAccount::blobService::storageAccountImagesBlobContainer.name
         }
+        {
+          name: 'SqlDatabaseConnectionString'
+          value: sqlDatabaseConnectionString
+        }
       ]
     }
   }
@@ -121,6 +147,29 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
         publicAccess: 'Blob'
       }
     }
+  }
+}
+
+resource sqlServer 'Microsoft.Sql/servers@2021-08-01-preview' = {
+  name: sqlServerName
+  location: location
+  properties: {
+    administratorLogin: sqlServerAdministratorLogin
+    administratorLoginPassword: sqlServerAdministratorLoginPassword
+  }
+
+  resource sqlServerFirewallRule 'firewallRules' = {
+    name: 'AllowAllWindowsAzureIps'
+    properties: {
+      endIpAddress: '0.0.0.0'
+      startIpAddress: '0.0.0.0'
+    }
+  }
+
+  resource sqlDatabase 'databases' = {
+    name: sqlDatabaseName
+    location: location
+    sku: environmentConfigurationMap[environmentType].sqlDatabase.sku
   }
 }
 
